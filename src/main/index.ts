@@ -39,13 +39,13 @@ const template: MenuItemConstructorOptions[] = [
       {
         label: '反馈建议',
         click() {
-          shell.openExternal('https://github.com/cyytemplate/vite-electron-ts/issues')
+          shell.openExternal('https://www.baidu.com')
         }
       },
       {
         label: 'GitHub',
         click() {
-          shell.openExternal('https://github.com/cyytemplate/vite-electron-ts')
+          shell.openExternal('https://github.com')
         }
       }
     ]
@@ -54,11 +54,14 @@ const template: MenuItemConstructorOptions[] = [
 const menu = Menu.buildFromTemplate(template)
 function createWindow() {
   mainWindow = new BrowserWindow({
-    minWidth: 1140,
-    minHeight: 700,
+    minWidth: 300,
+    minHeight: 520,
     width: 1240,
     height: 700,
     titleBarStyle: "default",
+    center: true,
+    backgroundColor: "#ececec",
+    alwaysOnTop: false,
     webPreferences: {
       contextIsolation: false,
       // enableRemoteModule: false,
