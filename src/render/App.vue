@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, Ref } from 'vue'
+import { defineComponent, ref } from 'vue'
 import Layout from '@/components/Layout.vue'
 import { darkTheme } from 'naive-ui'
 export default defineComponent({
@@ -70,6 +70,7 @@ body,
 	border-top: 1px solid rgb(235, 235, 235);
 	border-bottom: 1px solid rgb(235, 235, 235);
 	box-shadow: 0px 2px 12px #e5e5e5;
+	background-color: #fff;
 }
 .layout-footer {
 	height: 50px;
@@ -77,5 +78,6 @@ body,
 	border-top: 1px solid rgb(235, 235, 235);
 	box-shadow: 0 -2px 12px #e5e5e5;
 	display: flex;
+	background-color: #fff;
 }
 </style>

@@ -34,7 +34,8 @@
 				box-sizing: border-box;
 			"
 		>
-			<n-card>
+			<v-md-editor v-model="text" height="400px"></v-md-editor>
+			<n-card v-if="false">
 				<n-empty description="做什么还没想好，先搭个骨架">
 					<template #icon>
 						<n-icon>
