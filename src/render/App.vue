@@ -61,6 +61,13 @@ body,
 	position: relative;
 	margin-bottom: -1px;
 }
+.layout-aside{
+	width: 200px;
+	background: #fff;
+	box-sizing: border-box;
+	border-right: 1px solid rgb(235, 235, 235);
+	box-shadow: 2px 0px 12px #e5e5e5;
+}
 .layout-header {
 	display: flex;
 	padding: 0 12px;

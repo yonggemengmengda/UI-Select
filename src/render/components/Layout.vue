@@ -28,13 +28,21 @@
 		<div
 			class="layout-content"
 			style="
+				display: flex;
 				align-item: center;
-				padding: 120px 20px 0;
-
 				box-sizing: border-box;
 			"
 		>
-			<v-md-editor v-model="text" height="400px"></v-md-editor>
+			<div class="layout-aside m-tb-8 m-l-8 m-r-6">
+				<div class="file-list">
+					<div @click="()=>{getFileData(file)}" class="file-item text-primary text-link p-lr-12 p-tb-8 font-line-1 border-bottom-1" v-for="file,idx in fileList" :key="idx">
+						{{file}}
+					</div>
+				</div>
+			</div>
+			<div class="layout-sec m-tb-8 m-r-8 width-full">
+				<v-md-editor  v-model="fileData" height="100%" @save="toSave"></v-md-editor>
+			</div>
 			<n-card v-if="false">
 				<n-empty description="做什么还没想好，先搭个骨架">
 					<template #icon>
@@ -94,14 +102,20 @@
 <script lang="ts">
 import { ref, defineComponent } from 'vue'
 import { zhCN, dateZhCN, useMessage } from 'naive-ui'
+const ipcRenderer = require("electron").ipcRenderer;
+
 export default defineComponent({
 	name: 'Layout',
 	setup(props, ctx) {
+		const fileDir = '/md'
+		const text = ref()
 		const theme = ref(),
 			message = useMessage(),
 			locale = ref(),
 			dateLocale = ref(),
-			lang = ref('中文(CN)')
+			lang = ref('中文(CN)'),
+			title = ref('test'),
+			fileData = ref('')
 		const handleUpdateLang = (lang: '中文(CN)' | '英文(EN)') => {
 			message.info(lang)
 			locale.value = lang == '中文(CN)' ? zhCN : null
@@ -132,6 +146,29 @@ export default defineComponent({
 			}
 			return style
 		}
+		const fileList = ref()
+		ipcRenderer.on("writeFile-res",(event,msg:string)=>message.success(msg))
+		ipcRenderer.on("readFileList-res",(event,res:{msg:string,list:Array<{[k:string]:any}>})=>{
+			fileList.value = res.list
+		})
+		ipcRenderer.on("readFileData-res",(event,res:{msg:string,data:any})=>{
+			console.log(res.data)
+			fileData.value = res.data
+		})
+		const getFileList = ()=> {
+			ipcRenderer.send("readFileList-req",fileDir)
+		}
+		const getFileData = (name:string) => {
+			ipcRenderer.send("readFileData-req",`${fileDir}/${name}`)
+		}
+		getFileList()
+		const toSave = (text:string,html:string) => {
+			if(!html)	return message.warning('无保存内容')
+			ipcRenderer.send('writeFile-req',{
+				path: `/md/${title.value}.md`,
+				data: html
+			})
+		}
 		return {
 			lang,
 			zhCN,
@@ -140,6 +177,10 @@ export default defineComponent({
 			theme,
 			handleThemeChange,
 			railStyle,
+			toSave,
+			fileList,
+			getFileData,
+			fileData
 		}
 	},
 })

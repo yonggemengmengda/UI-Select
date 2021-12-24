@@ -1,5 +1,6 @@
-import { join } from 'path';
-import { app, BrowserWindow, Menu, MenuItemConstructorOptions, shell } from 'electron';
+import { join ,resolve} from 'path';
+const fs = require('fs');
+import { app, BrowserWindow, Menu, MenuItemConstructorOptions, shell ,ipcMain} from 'electron';
 import './router';
 import './menu';
 const isDev = process.env.NODE_ENV === 'development'
@@ -108,3 +109,23 @@ app.on('activate', () => {
   }
 })
 app.on('before-quit', () => willQuitApp = true)
+
+ipcMain.on('writeFile-req', function(event, arg) {
+  fs.writeFile(join(__dirname,arg.path),JSON.stringify(arg.data), "utf8",(err:String)=>{
+    if(err) return event.sender.send('writeFile-res', "保存失败");
+    event.sender.send('writeFile-res', "保存成功");
+  })
+})
+ipcMain.on('readFileList-req',(event,dir)=>{
+  fs.readdir(join(__dirname,dir),(err:string,files:any[])=>{
+    if(err) return event.sender.send('readFileList-res', "读取失败");
+    event.sender.send('readFileList-res', {list:files.filter(item=>item != '.DS_Store'),msg:'读取成功'});
+  })
+})
+ipcMain.on('readFileData-req',(event,filePath)=>{
+  fs.readFile(join(__dirname,filePath),'utf-8',(err:string,file:any)=>{
+    console.log(err);
+    if(err) return event.sender.send('readFileData-res', "读取失败");
+    event.sender.send('readFileData-res', {data:file,msg:'读取成功'});
+  })
+})
