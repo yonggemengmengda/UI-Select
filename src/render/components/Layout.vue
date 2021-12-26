@@ -27,21 +27,111 @@
 		</div>
 		<div
 			class="layout-content"
-			style="
-				display: flex;
-				align-item: center;
-				box-sizing: border-box;
-			"
+			style="display: flex; align-item: center; box-sizing: border-box"
 		>
-			<div class="layout-aside m-tb-8 m-l-8 m-r-6">
-				<div class="file-list">
-					<div @click="()=>{getFileData(file)}" class="file-item text-primary text-link p-lr-12 p-tb-8 font-line-1 border-bottom-1" v-for="file,idx in fileList" :key="idx">
-						{{file}}
+			<div
+				class="layout-aside m-tb-8 m-l-8 m-r-6 border-radius-4"
+				style="height: calc(100% - 16px)"
+			>
+				<div
+					class="
+						p-lr-12 p-tb-9
+						border-bottom-1
+						flex flex-row-center flex-col-between
+					"
+				>
+					<span class="text-primary text-link">笔记列表</span>
+					<n-icon
+						@click="addFile"
+						class="text-primary text-link"
+						size="18"
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							xmlns:xlink="http://www.w3.org/1999/xlink"
+							viewBox="0 0 20 20"
+						>
+							<g fill="none">
+								<path
+									d="M6 10a.5.5 0 0 1 .5-.5h3v-3a.5.5 0 0 1 1 0v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3A.5.5 0 0 1 6 10z"
+									fill="currentColor"
+								></path>
+								<path
+									d="M10 18a8 8 0 1 0 0-16a8 8 0 0 0 0 16zm0-1a7 7 0 1 1 0-14a7 7 0 0 1 0 14z"
+									fill="currentColor"
+								></path>
+							</g></svg
+					></n-icon>
+				</div>
+				<div
+					class="file-list layout-scroll"
+					style="overflow-y: auto; height: calc(100% - 40px)"
+				>
+					<div
+						class="
+							flex
+							file-item
+							font-line-1
+							text-link text-333
+							p-tb-8 p-lr-12
+						"
+						:class="{ 'bg-gray-400': idx === currentFileIndex }"
+						v-for="(file, idx) in fileList"
+						:key="idx"
+					>
+						<n-input
+							style="--border: none"
+							maxlength="10"
+							size="small"
+							:default-value="fileList[idx]"
+							:placeholder="fileList[idx]"
+							@blur="
+								(e) => {
+									handlerFileRename(idx, e.target.value)
+								}
+							"
+							@click="
+								() => {
+									getFileData(file, idx)
+								}
+							"
+						></n-input>
+						<n-popconfirm
+							@positive-click="handleDelPositiveClick(file)"
+							negative-text="取消"
+							positive-text="确定"
+						>
+							<template #trigger>
+								<n-button text class="m-l-2">
+									<n-icon size="16">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											xmlns:xlink="http://www.w3.org/1999/xlink"
+											viewBox="0 0 512 512"
+										>
+											<path
+												d="M289.94 256l95-95A24 24 0 0 0 351 127l-95 95l-95-95a24 24 0 0 0-34 34l95 95l-95 95a24 24 0 1 0 34 34l95-95l95 95a24 24 0 0 0 34-34z"
+												fill="currentColor"
+											></path>
+										</svg>
+									</n-icon>
+								</n-button>
+							</template>
+							确定删除该文件吗？
+						</n-popconfirm>
 					</div>
 				</div>
 			</div>
 			<div class="layout-sec m-tb-8 m-r-8 width-full">
-				<v-md-editor  v-model="fileData" height="100%" @save="toSave"></v-md-editor>
+				<v-md-editor
+					v-model="fileData"
+					height="100%"
+					@save="
+						(text) => {
+							saveFile(fileList[currentFileIndex], text)
+						}
+					"
+				></v-md-editor>
 			</div>
 			<n-card v-if="false">
 				<n-empty description="做什么还没想好，先搭个骨架">
@@ -100,15 +190,15 @@
 </template>
 
 <script lang="ts">
-import { ref, defineComponent } from 'vue'
+import { ref, defineComponent, watch, reactive } from 'vue'
 import { zhCN, dateZhCN, useMessage } from 'naive-ui'
-const ipcRenderer = require("electron").ipcRenderer;
-
+import useFileCtrl from '../api/file'
 export default defineComponent({
 	name: 'Layout',
 	setup(props, ctx) {
-		const fileDir = '/md'
-		const text = ref()
+		const newFileIndex = ref(0)
+		const firstLoad = ref(true)
+		const text = ref('')
 		const theme = ref(),
 			message = useMessage(),
 			locale = ref(),
@@ -124,6 +214,20 @@ export default defineComponent({
 		const handleThemeChange = (theme: boolean) => {
 			message.info(theme ? 'Dark' : 'Light')
 			ctx.emit('handleThemeChange', theme)
+		}
+		const handleDelPositiveClick = async (name: string) => {
+			const res = await File.remove(name)
+			if (res.data === 'ok') {
+				message.success('删除成功')
+				getFileList()
+			}
+		}
+		const handlerFileRename = async (idx: number, newName: string) => {
+			if (!newName) return message.warning('文件名不能为空')
+			if (fileList.value[idx] === newName) return
+			const res = await File.rename(fileList.value[idx], newName)
+			console.log(res)
+			fileList.value[idx] = newName
 		}
 		const railStyle = ({
 			focused,
@@ -147,27 +251,61 @@ export default defineComponent({
 			return style
 		}
 		const fileList = ref()
-		ipcRenderer.on("writeFile-res",(event,msg:string)=>message.success(msg))
-		ipcRenderer.on("readFileList-res",(event,res:{msg:string,list:Array<{[k:string]:any}>})=>{
-			fileList.value = res.list
-		})
-		ipcRenderer.on("readFileData-res",(event,res:{msg:string,data:any})=>{
-			console.log(res.data)
+		const currentFileIndex = ref(-1)
+
+		const File = new useFileCtrl()
+		// ipcRenderer.on('writeFile-res', (event, msg: string) => {
+		// 	if (!state.shouldRefreshFileList) return
+		// 	return getFileList()
+		// })
+		// ipcRenderer.on(
+		// 	'readFileList-res',
+		// 	(event, res: { msg: string; list: string[] }) => {
+		// 		fileList.value = res.list
+		// 		if (firstLoad.value) {
+		// 			getFileData(fileList.value[currentFileIndex.value])
+		// 			firstLoad.value = false
+		// 		}
+		// 	}
+		// )
+		// ipcRenderer.on(
+		// 	'readFileData-res',
+		// 	(event, res: { msg: string; data: any }) => {
+		// 		fileData.value = res.data
+		// 			.replace(/"/g, '')
+		// 			.replace(/\\n/g, '\n')
+		// 	}
+		// )
+		const getFileList = async () => {
+			const res = await File.list()
+			console.log(res)
+			fileList.value = res.data
+			if (firstLoad.value) {
+				getFileData(fileList.value[0], 0)
+				firstLoad.value = false
+			}
+		}
+		const getFileData = async (name: string, idx: number) => {
+			//if (idx !== currentFileIndex.value) saveFile(fileData.value)
+			if (idx === currentFileIndex.value) return
+			currentFileIndex.value = idx
+			const res = await File.read(name)
 			fileData.value = res.data
-		})
-		const getFileList = ()=> {
-			ipcRenderer.send("readFileList-req",fileDir)
 		}
-		const getFileData = (name:string) => {
-			ipcRenderer.send("readFileData-req",`${fileDir}/${name}`)
-		}
+
 		getFileList()
-		const toSave = (text:string,html:string) => {
-			if(!html)	return message.warning('无保存内容')
-			ipcRenderer.send('writeFile-req',{
-				path: `/md/${title.value}.md`,
-				data: html
-			})
+		const saveFile = async (
+			name: string,
+			text: string,
+			isCreate?: boolean
+		) => {
+			if (!text && !isCreate) return message.warning('无保存内容')
+			await File.write(name, text)
+			if (!isCreate) return message.success('保存成功')
+			getFileList()
+		}
+		const addFile = () => {
+			saveFile(`新建笔记${++newFileIndex.value}.md`, '', true)
 		}
 		return {
 			lang,
@@ -177,10 +315,15 @@ export default defineComponent({
 			theme,
 			handleThemeChange,
 			railStyle,
-			toSave,
+			saveFile,
 			fileList,
 			getFileData,
-			fileData
+			text,
+			fileData,
+			currentFileIndex,
+			handleDelPositiveClick,
+			handlerFileRename,
+			addFile,
 		}
 	},
 })

@@ -2,11 +2,11 @@
  * @Author: Yong
  * @Date: 2021-12-23 09:27:22
  * @LastEditors: Yong
- * @LastEditTime: 2021-12-24 17:46:57
+ * @LastEditTime: 2021-12-26 22:39:00
  * @Description: 
  */
 import { createApp } from 'vue'
-import { create, NButton, NSpace, NConfigProvider, NCard, NMessageProvider, NSwitch, NEmpty, NIcon } from 'naive-ui'
+import { create, NButton, NSpace, NConfigProvider, NCard, NMessageProvider, NSwitch, NEmpty, NIcon, NInput, NPopconfirm } from 'naive-ui'
 import App from './App.vue'
 import VueMarkdownEditor from '@kangc/v-md-editor';
 import '@kangc/v-md-editor/lib/style/base-editor.css';
@@ -27,10 +27,10 @@ VueMarkdownEditor.use(createLineNumbertPlugin())
 VueMarkdownEditor.use(createCopyCodePlugin())
 VueMarkdownEditor.use(createHighlightLinesPlugin())
 const naive = create({
-    components: [NButton, NSpace, NConfigProvider, NCard, NMessageProvider, NSwitch, NEmpty, NIcon]
+  components: [NButton, NSpace, NConfigProvider, NCard, NMessageProvider, NSwitch, NEmpty, NIcon, NInput, NPopconfirm]
 })
 
 createApp(App)
-    .use(naive)
-    .use(VueMarkdownEditor)
-    .mount('#app')
+  .use(naive)
+  .use(VueMarkdownEditor)
+  .mount('#app')

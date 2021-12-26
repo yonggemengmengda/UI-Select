@@ -1,6 +1,6 @@
-import { join ,resolve} from 'path';
+import { join, resolve } from 'path';
 const fs = require('fs');
-import { app, BrowserWindow, Menu, MenuItemConstructorOptions, shell ,ipcMain} from 'electron';
+import { app, BrowserWindow, Menu, MenuItemConstructorOptions, shell, ipcMain } from 'electron';
 import './router';
 import './menu';
 const isDev = process.env.NODE_ENV === 'development'
@@ -109,23 +109,38 @@ app.on('activate', () => {
   }
 })
 app.on('before-quit', () => willQuitApp = true)
-
-ipcMain.on('writeFile-req', function(event, arg) {
-  fs.writeFile(join(__dirname,arg.path),JSON.stringify(arg.data), "utf8",(err:String)=>{
-    if(err) return event.sender.send('writeFile-res', "保存失败");
-    event.sender.send('writeFile-res', "保存成功");
+ipcMain.on('writeFile-req', function (event, arg) {
+  fs.writeFile(join(__dirname, arg.path), arg.data, "utf-8", (err: string) => {
+    if (err) return event.sender.send('writeFile-res', { err: JSON.stringify(err) });
+    return event.sender.send('writeFile-res', { data: 'ok' });
   })
 })
-ipcMain.on('readFileList-req',(event,dir)=>{
-  fs.readdir(join(__dirname,dir),(err:string,files:any[])=>{
-    if(err) return event.sender.send('readFileList-res', "读取失败");
-    event.sender.send('readFileList-res', {list:files.filter(item=>item != '.DS_Store'),msg:'读取成功'});
+const sortByCreateTime = (files: string[]) => {
+  return files.sort((a, b) => {
+    return fs.statSync(join(__dirname, `/md/${a}`)).birthtime - fs.statSync(join(__dirname, `/md/${b}`)).birthtime
+  })
+}
+ipcMain.on('readFileList-req', (event, dir) => {
+  fs.readdir(join(__dirname, dir), (err: string, files: any[]) => {
+    if (err) return event.sender.send('readFileList-res', { err: JSON.stringify(err) });
+    return event.sender.send('readFileList-res', { data: sortByCreateTime(files.filter(item => item != '.DS_Store')) });
   })
 })
-ipcMain.on('readFileData-req',(event,filePath)=>{
-  fs.readFile(join(__dirname,filePath),'utf-8',(err:string,file:any)=>{
-    console.log(err);
-    if(err) return event.sender.send('readFileData-res', "读取失败");
-    event.sender.send('readFileData-res', {data:file,msg:'读取成功'});
+ipcMain.on('readFileData-req', (event, filePath) => {
+  fs.readFile(join(__dirname, filePath), 'utf-8', (err: string, file: any) => {
+    if (err) return event.sender.send('readFileData-res', { data: null, err: JSON.stringify(err) });
+    return event.sender.send('readFileData-res', { data: file });
+  })
+})
+ipcMain.on('rename-req', (event, fileName) => {
+  fs.rename(join(__dirname, fileName.oldName), join(__dirname, fileName.newName), (err: string) => {
+    if (err) return event.sender.send('rename-res', { err: JSON.stringify(err) });
+    return event.sender.send('rename-res', { data: 'ok' });
+  })
+})
+ipcMain.on('remove-req', (event, fileName) => {
+  fs.unlink(join(__dirname, fileName), (err: string) => {
+    if (err) return event.sender.send('remove-res', { err: JSON.stringify(err) })
+    return event.sender.send('remove-res', { data: 'ok' })
   })
 })
