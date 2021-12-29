@@ -1,8 +1,3 @@
-$baseColorMap: (
-	dark: #000000,
-	white: #ffffff,
-	transparent: transparent,
-);
 $baseThemeColor: (
 	primary: #409eff,
 	success: #0c0f0e,
@@ -30,12 +25,12 @@ $directionMap: (
 	lr: $directionLeftRight,
 );
 $bgColorMap: (
+	white: #ffffff,
+	dark: #000000,
 	gray-100: #dcdfe6,
 	gray-200: #e4e7ed,
 	gray-300: #ebeef5,
 	gray-400: #f2f6fc,
-	dark: #000000,
-	white: #ffffff,
 	transparent: transparent,
 	table-header: #f0f0f0,
 	search: #f5f5f5,
@@ -146,8 +141,8 @@ $textColorMap: (
 }
 /* border,line-clamp end */
 /* border-radius start */
-@for $radius from 1 through 20{
-	.border-radius-#{$radius}{
+@for $radius from 1 through 20 {
+	.border-radius-#{$radius} {
 		border-radius: #{$radius}px;
 	}
 }
@@ -176,6 +171,9 @@ $textColorMap: (
 }
 .flex-auto {
 	flex: auto;
+}
+.flex-wrap {
+	flex-wrap: wrap;
 }
 .flex-column {
 	display: flex;
@@ -299,19 +297,19 @@ $textColorMap: (
 .fadeIn-leave-active {
 	transition: opacity ease-in-out 0.3s;
 }
-.fix-iphoneX{
+.fix-iphoneX {
 	margin-bottom: 0;
-  margin-bottom: constant(safe-area-inset-bottom);
+	margin-bottom: constant(safe-area-inset-bottom);
 	margin-bottom: env(safe-area-inset-bottom);
 }
-.layout-wrap{
+.layout-wrap {
 	height: 100%;
 	display: flex;
 	-webkit-flex-direction: column;
 	-ms-flex-direction: column;
 	flex-direction: column;
 }
-.layout-content{
+.layout-content {
 	width: 100%;
 	height: 100%;
 	-webkit-box-flex: 1;
@@ -323,11 +321,11 @@ $textColorMap: (
 	position: relative;
 	margin-bottom: -1px;
 }
-.layout-nav{
+.layout-nav {
 	position: relative;
-  display: flex;
+	display: flex;
 }
-.layout-footer{
+.layout-footer {
 	position: relative;
 	display: flex;
 	margin-bottom: constant(safe-area-inset-bottom);

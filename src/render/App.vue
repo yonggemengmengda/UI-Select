@@ -99,7 +99,7 @@ body,
 	margin-bottom: -1px;
 }
 .layout-aside {
-	width: 200px;
+	width: 346px;
 	background: #fff;
 	box-sizing: border-box;
 	border-right: 1px solid rgb(235, 235, 235);

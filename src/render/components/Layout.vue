@@ -29,7 +29,8 @@
 			class="layout-content"
 			style="display: flex; align-item: center; box-sizing: border-box"
 		>
-			<div
+			<n-card
+				content-style="padding:0"
 				class="layout-aside m-tb-8 m-l-8 m-r-6 border-radius-4"
 				style="height: calc(100% - 16px)"
 			>
@@ -64,65 +65,89 @@
 					></n-icon>
 				</div>
 				<div
-					class="file-list layout-scroll"
-					style="overflow-y: auto; height: calc(100% - 40px)"
+					class="file-list layout-scroll flex flex-wrap"
+					style="
+						overflow-y: auto;
+						height: calc(100% - 170px);
+						background-color: #f8f8f8;
+					"
 				>
 					<div
 						class="
-							flex
+							flex flex-wrap flex-col-center
 							file-item
 							font-line-1
 							text-link text-333
-							p-tb-8 p-lr-12
+							p-tb-8 p-lr-8
+							m-l-8 m-t-8
+							bg-white
 						"
-						:class="{ 'bg-gray-400': idx === currentFileIndex }"
+						@click="
+							() => {
+								getFileData(file, idx)
+							}
+						"
+						:style="
+							idx === currentFileIndex
+								? 'box-shadow:1px 1px 8px #80d0ff;width: 104px;height:140px;border-radius:14px'
+								: 'box-shadow:1px 1px 8px #ddd;width: 104px;height:140px;border-radius:14px'
+						"
 						v-for="(file, idx) in fileList"
 						:key="idx"
 					>
-						<n-input
-							style="--border: none"
-							maxlength="10"
-							size="small"
-							:default-value="fileList[idx]"
-							:placeholder="fileList[idx]"
-							@blur="
-								(e) => {
-									handlerFileRename(idx, e.target.value)
-								}
-							"
-							@click="
-								() => {
-									getFileData(file, idx)
-								}
-							"
-						></n-input>
-						<n-popconfirm
-							@positive-click="handleDelPositiveClick(file)"
-							negative-text="取消"
-							positive-text="确定"
-						>
-							<template #trigger>
-								<n-button text class="m-l-2">
-									<n-icon size="16">
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											xmlns:xlink="http://www.w3.org/1999/xlink"
-											viewBox="0 0 512 512"
-										>
-											<path
-												d="M289.94 256l95-95A24 24 0 0 0 351 127l-95 95l-95-95a24 24 0 0 0-34 34l95 95l-95 95a24 24 0 1 0 34 34l95-95l95 95a24 24 0 0 0 34-34z"
-												fill="currentColor"
-											></path>
-										</svg>
-									</n-icon>
-								</n-button>
-							</template>
-							确定删除该文件吗？
-						</n-popconfirm>
+						<div>
+							<n-image
+								:preview-disabled="true"
+								width="100"
+								src="https://gw.alipayobjects.com/zos/antfincdn/aPkFc8Sj7n/method-draw-image.svg"
+							/>
+						</div>
+						<div class="flex">
+							<n-input
+								style="--border: none"
+								maxlength="10"
+								size="small"
+								:default-value="
+									fileList[idx].replace(/\..*$/, '')
+								"
+								:placeholder="fileList[idx]"
+								@blur="
+									(e) => {
+										handlerFileRename(idx, e.target.value)
+									}
+								"
+							></n-input>
+							<n-popconfirm
+								@positive-click="handleDelPositiveClick(file)"
+								negative-text="取消"
+								positive-text="确定"
+							>
+								<template #trigger>
+									<n-button text class="m-l-2">
+										<n-icon size="16">
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												xmlns:xlink="http://www.w3.org/1999/xlink"
+												viewBox="0 0 512 512"
+											>
+												<path
+													d="M289.94 256l95-95A24 24 0 0 0 351 127l-95 95l-95-95a24 24 0 0 0-34 34l95 95l-95 95a24 24 0 1 0 34 34l95-95l95 95a24 24 0 0 0 34-34z"
+													fill="currentColor"
+												></path>
+											</svg>
+										</n-icon>
+									</n-button>
+								</template>
+								确定删除该文件吗？
+							</n-popconfirm>
+						</div>
 					</div>
 				</div>
-			</div>
-			<div class="layout-sec m-tb-8 m-r-8 width-full">
+			</n-card>
+			<n-card
+				class="layout-sec m-tb-8 m-r-8 width-full"
+				content-style="padding:0"
+			>
 				<v-md-editor
 					v-model="fileData"
 					height="100%"
@@ -132,7 +157,7 @@
 						}
 					"
 				></v-md-editor>
-			</div>
+			</n-card>
 			<n-card v-if="false">
 				<n-empty description="做什么还没想好，先搭个骨架">
 					<template #icon>
