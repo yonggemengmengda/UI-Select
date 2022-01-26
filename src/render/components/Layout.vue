@@ -65,11 +65,12 @@
 					></n-icon>
 				</div>
 				<div
-					class="file-list layout-scroll flex flex-wrap"
+					class="file-list layout-scroll flex flex-wrap p-b-10"
 					style="
 						overflow-y: auto;
-						height: calc(100% - 170px);
+						height: calc(100% - 40px);
 						background-color: #f8f8f8;
+						box-sizing: border-box;
 					"
 				>
 					<div
@@ -99,6 +100,7 @@
 							<n-image
 								:preview-disabled="true"
 								width="100"
+								draggable="false"
 								src="https://gw.alipayobjects.com/zos/antfincdn/aPkFc8Sj7n/method-draw-image.svg"
 							/>
 						</div>
@@ -354,5 +356,10 @@ export default defineComponent({
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+.layout-wrap {
+	&:deep(.n-card__content) {
+		height: 100%;
+	}
+}
 </style>

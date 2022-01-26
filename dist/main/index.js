@@ -87,6 +87,7 @@ function createWindow() {
         mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.show();
     });
 }
+process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 electron_1.app.on('ready', createWindow);
 electron_1.app.on('window-all-closed', function () {
     if (process.platform !== 'darwin') {
